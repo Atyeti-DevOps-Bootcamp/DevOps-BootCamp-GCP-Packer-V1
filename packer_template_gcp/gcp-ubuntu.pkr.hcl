@@ -22,7 +22,7 @@ variable "user1_password" {
 }
 
 source "googlecompute" "ubuntu" {
-  project_id = "GKE-Shruti"
+  project_id = "packer-automation-483407"
   zone       = "us-central1-a"
 
   image_name   = "packer-ubuntu-hardened-{{timestamp}}"

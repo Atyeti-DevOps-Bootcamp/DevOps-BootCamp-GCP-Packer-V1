@@ -117,7 +117,7 @@ jobs:
       # Create GCP credentials file
       - name: Create GCP credentials
         run: |
-          echo '${{ secrets.GCP_SA_KEY_PUNE }}' > gcp-key.json
+          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
           chmod 600 gcp-key.json
 
       # Validate GCP credentials file
@@ -188,7 +188,7 @@ jobs:
 
       - name: Create GCP credentials
         run: |
-          echo '${{ secrets.GCP_SA_KEY_PUNE }}' > gcp-key.json
+          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
           chmod 600 gcp-key.json
 
       - name: Terraform Init
@@ -250,7 +250,7 @@ jobs:
 
       - name: Create GCP credentials
         run: |
-          echo '${{ secrets.GCP_SA_KEY_PUNE }}' > gcp-key.json
+          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
           chmod 600 gcp-key.json
 
       # Wait for 15 minutes (CRON-LIKE)
