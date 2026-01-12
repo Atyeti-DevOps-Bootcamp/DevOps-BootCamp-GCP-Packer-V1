@@ -1,5 +1,5 @@
 variable "project_id" {
-  default = "packer-automation-483407"
+  default = "GKE-Shruti"
 }
 
 variable "image_name" {
