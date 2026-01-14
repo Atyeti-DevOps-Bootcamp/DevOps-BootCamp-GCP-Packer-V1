@@ -186,11 +186,11 @@ jobs:
             -var="image_name=${{ needs.packer-build.outputs.image_name }}" \
             -auto-approve
 
-      # ✅ ONLY ADDITION
+      #ADDE
       - name: Validate VM Users & Permissions
         run: |
           chmod +x verify_users.sh
-          ./verify_users.sh
+          .vscode/scripts/verify_users.sh
 
   terraform-destroy-after-30min:
     name: Terraform Destroy After 30 Minutes
@@ -225,7 +225,7 @@ jobs:
 
       - name: Wait for 15 minutes before destroy
         run: |
-          echo "⏳ Waiting for 15 minutes before destroying resources..."
+          echo "Waiting for 15 minutes before destroying resources..."
           sleep 900
 
       - name: Terraform Init
