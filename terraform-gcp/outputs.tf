@@ -1,7 +1,9 @@
 output "vm_name" {
-  value = modules.compute_instance.vm_name
+  description = "Name of the created VM"
+  value       = module.packer_vm.vm_name
 }
 
 output "vm_ip" {
-  value = modules.compute_instance.vm_ip
+  description = "External IP of the created VM"
+  value       = module.packer_vm.vm_ip
 }
