@@ -176,6 +176,10 @@ jobs:
           cd terraform-gcp
           terraform plan \
             -var="image_name=${{ needs.packer-build.outputs.image_name }}"
+      #generating ssh key
+      - name: Generate SSH key for VM access
+        run: |
+          ssh-keygen -t ed25519 -f gha_ssh_key -N ""
 
       - name: Terraform Apply
         env:
@@ -184,6 +188,7 @@ jobs:
           cd terraform-gcp
           terraform apply \
             -var="image_name=${{ needs.packer-build.outputs.image_name }}" \
+            -var="ssh_public_key=$(cat ../gha_ssh_key.pub)" \
             -auto-approve
 
       #ADDED

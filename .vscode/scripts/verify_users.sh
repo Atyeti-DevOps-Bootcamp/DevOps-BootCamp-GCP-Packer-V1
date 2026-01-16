@@ -21,7 +21,7 @@ cd ..
 echo "Waiting for VM SSH to be ready..."
 sleep 60
 
-SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+SSH_OPTS="-i gha_ssh_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 echo "Connecting to VM via SSH..."
 

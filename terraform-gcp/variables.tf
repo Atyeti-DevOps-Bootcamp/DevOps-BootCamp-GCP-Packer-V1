@@ -18,3 +18,7 @@ variable "machine_type" {
 variable "zone" {
   default = "asia-south1-a"
 }
+
+variable "ssh_public_key" {
+  type = string
+}

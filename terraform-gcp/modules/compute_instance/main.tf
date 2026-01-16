@@ -13,4 +13,8 @@ resource "google_compute_instance" "packer_vm" {
     network = "default"
     access_config {}
   }
+  metadata = {
+    ssh-keys = "admin:${var.ssh_public_key}"
+  }
 }
+  

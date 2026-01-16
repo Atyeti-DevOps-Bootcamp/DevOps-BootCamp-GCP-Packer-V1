@@ -13,4 +13,5 @@ module "packer_vm" {
   zone          = var.zone
   project_id    = var.project_id
   image_name    = var.image_name
+  ssh_public_key  = var.ssh_public_key
 }
