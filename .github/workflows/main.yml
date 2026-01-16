@@ -189,7 +189,7 @@ jobs:
           cd terraform-gcp
           terraform apply \
             -var="image_name=${{ needs.packer-build.outputs.image_name }}" \
-            -var="ssh_public_key=$(cat ../gha_ssh_key.pub)" \
+            -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
             -auto-approve
 
       #ADDED#
