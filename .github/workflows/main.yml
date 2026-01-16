@@ -180,6 +180,7 @@ jobs:
       - name: Generate SSH key for VM access
         run: |
           ssh-keygen -t ed25519 -f gha_ssh_key -N ""
+          chmod 600 gha_ssh_key
 
       - name: Terraform Apply
         env:
