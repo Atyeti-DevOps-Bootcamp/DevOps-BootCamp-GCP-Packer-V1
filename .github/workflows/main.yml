@@ -157,7 +157,7 @@ jobs:
           echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
           chmod 600 gcp-key.json
 
-      # 🔐 UPDATED PART (ONLY CHANGE)
+      # UPDATED PART (ONLY CHANGE)
       - name: Generate temporary SSH key
         run: |
           mkdir -p ~/.ssh
@@ -203,7 +203,7 @@ jobs:
 
       - name: Validate VM Users & Permissions
         env:
-          TFC_TOKEN: ${{ secrets.TFC_TOKEN }}
+          TF_TOKEN_app_terraform_io: ${{ secrets.TFC_TOKEN }}
         run: |
           chmod +x .vscode/scripts/verify_users.sh
           ./.vscode/scripts/verify_users.sh
