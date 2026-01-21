@@ -194,6 +194,13 @@ jobs:
 
       - name: Wait 15 minutes
         run: sleep 900
+        
+      - name: Terraform Init
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TFC_TOKEN }}
+        run: |
+          cd terraform-gcp
+          terraform init
 
       - name: Terraform Destroy
         env:
