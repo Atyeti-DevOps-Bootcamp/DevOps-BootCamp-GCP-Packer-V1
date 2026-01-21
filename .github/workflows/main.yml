@@ -171,6 +171,8 @@ jobs:
             -auto-approve
 
       - name: Validate VM Users & Permissions
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TFC_TOKEN }}
         run: |
           chmod +x .vscode/scripts/verify_users.sh
           ./.vscode/scripts/verify_users.sh
