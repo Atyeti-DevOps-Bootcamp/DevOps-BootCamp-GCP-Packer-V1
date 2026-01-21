@@ -1,5 +1,5 @@
 name: Packer GCP Build
- 
+
 on:
   push:
     branches:
@@ -9,140 +9,151 @@ on:
     branches:
       - main
   workflow_dispatch:
- #
+
 permissions:
   id-token: write
   contents: read
- 
+
 jobs:
   packer-build:
     runs-on: ubuntu-latest
- 
+
     outputs:
       image_name: ${{ steps.packer.outputs.image_name }}
- 
+
     env:
       VAULT_ADDR: http://127.0.0.1:8200
       VAULT_TOKEN: root
- 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
- 
-      #  WORKLOAD IDENTITY AUTH
+
+      # Workload Identity Authentication
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: "projects/516216943908/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
-          service_account: "github-ci-sa@packer-automation-483407.iam.gserviceaccount.com"
- 
+          workload_identity_provider: projects/516216943908/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-ci-sa@packer-automation-483407.iam.gserviceaccount.com
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
- 
+          python-version: "3.x"
+
       - name: Install Ansible deps
         run: pip install ansible passlib
- 
+
       - name: Install Packer & Vault
         run: |
           sudo apt-get update
           sudo apt-get install -y curl unzip gnupg lsb-release jq
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/hashicorp.list
           sudo apt-get update
           sudo apt-get install -y packer vault
- 
+
       - name: Start Vault
         run: |
           vault server -dev -dev-root-token-id=root > vault.log 2>&1 &
           sleep 5
- 
+
       - name: Configure Vault Secrets
         run: |
           vault kv put secret/packer/ansible \
             admin_password="${{ secrets.ADMIN_PASSWORD }}" \
             user1_password="${{ secrets.USER1_PASSWORD }}"
- 
+
       - name: Create Packer vars from Vault
         run: |
           ADMIN_PASSWORD=$(vault kv get -field=admin_password secret/packer/ansible)
           USER1_PASSWORD=$(vault kv get -field=user1_password secret/packer/ansible)
- 
+
           cat <<EOF > packer_template_gcp/secrets.auto.pkrvars.hcl
           admin_password = "${ADMIN_PASSWORD}"
-          user1_password = "${USER1_PASSWORD}"
+          user1_password  = "${USER1_PASSWORD}"
           EOF
- 
+
       - name: Packer Init
         run: packer init packer_template_gcp
- 
+
       - name: Packer Validate
         run: packer validate packer_template_gcp
- 
+
       - name: Packer Build
         id: packer
         run: |
           packer build packer_template_gcp | tee packer.log
           IMAGE_NAME=$(grep -oP "project: \Kpacker-[^ ]+" packer.log | tail -1)
           echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
- 
+
   terraform-deploy:
     runs-on: ubuntu-latest
     needs: packer-build
- 
+
     steps:
-      - uses: actions/checkout@v4
- 
-      #  WORKLOAD IDENTITY AUTH
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Workload Identity Authentication
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: "projects/516216943908/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
-          service_account: "github-ci-sa@packer-automation-483407.iam.gserviceaccount.com"
- 
+          workload_identity_provider: projects/516216943908/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-ci-sa@packer-automation-483407.iam.gserviceaccount.com
+
       - name: Install Terraform
         run: |
           sudo apt-get update
+          sudo apt-get install -y curl gnupg software-properties-common
+          curl -fsSL https://apt.releases.hashicorp.com/gpg \
+            | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt-get update
           sudo apt-get install -y terraform
- 
+          terraform --version
+
       - name: Terraform Init
         run: |
           cd terraform-gcp
           terraform init
- 
+
       - name: Terraform Apply
         run: |
           cd terraform-gcp
           terraform apply \
             -var="image_name=${{ needs.packer-build.outputs.image_name }}" \
             -auto-approve
- 
+
   terraform-destroy-after-30min:
     runs-on: ubuntu-latest
     needs: terraform-deploy
- 
+
     steps:
-      - uses: actions/checkout@v4
- 
-      #  WORKLOAD IDENTITY AUTH
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Workload Identity Authentication
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: "projects/516216943908/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
-          service_account: "github-ci-sa@packer-automation-483407.iam.gserviceaccount.com"
- 
+          workload_identity_provider: projects/516216943908/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-ci-sa@packer-automation-483407.iam.gserviceaccount.com
+
       - name: Install Terraform
         run: |
           sudo apt-get update
           sudo apt-get install -y terraform
- 
+
       - name: Wait 15 minutes
         run: sleep 900
- 
+
       - name: Terraform Destroy
         run: |
           cd terraform-gcp
           terraform destroy \
             -var="image_name=${{ needs.packer-build.outputs.image_name }}" \
             -auto-approve
+
