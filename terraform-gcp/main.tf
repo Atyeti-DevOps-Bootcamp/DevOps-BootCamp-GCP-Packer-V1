@@ -15,3 +15,4 @@ module "packer_vm" {
   image_name    = var.image_name
   ssh_public_key  = var.ssh_public_key
 }
+##
