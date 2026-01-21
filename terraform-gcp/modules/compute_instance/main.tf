@@ -17,4 +17,5 @@ resource "google_compute_instance" "packer_vm" {
     ssh-keys = "admin:${var.ssh_public_key}"
   }
 }
-  
+##
+ 
