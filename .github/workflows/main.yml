@@ -3,7 +3,7 @@ name: Packer GCP Build
 on:
   push:
     branches:
-      - feature/althaf-v1
+      - feature/althaf-v
       
   pull_request:
     branches:
