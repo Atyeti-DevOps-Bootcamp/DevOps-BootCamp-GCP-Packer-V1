@@ -58,12 +58,8 @@ jobs:
         with:
           version: "1.9.2"  # pin the version
 
-      - name: Install Vault
-        run: sudo apt-get install -y vault
-
-      - name: Start Vault dev server
-        run: vault server -dev -dev-root-token-id=root & sleep 5
-
+      - name: Setup Vault
+        uses: hashicorp/setup-vault-action@v2
 
       - name: Configure Vault Secrets
         run: |
