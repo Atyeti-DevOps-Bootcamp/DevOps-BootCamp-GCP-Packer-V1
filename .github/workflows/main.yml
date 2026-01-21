@@ -3,10 +3,11 @@ name: Packer GCP Build & Terraform Deploy (Optimized)
 on:
   push:
     branches:
-      - feature/pipeline-optimization  
+      - feature/pipeline-optimization
   pull_request:
     branches:
-      - main
+      - feature/pipeline-optimization
+      
   workflow_dispatch:
 
 permissions:
@@ -26,23 +27,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Setup Packer (fast, cached)
       - name: Setup Packer
         uses: hashicorp/setup-packer@v2
 
+      # Setup Vault (correct action)
       - name: Setup Vault
-        uses: hashicorp/setup-vault@v2
+        uses: hashicorp/setup-vault-action@v2
 
+      # Authenticate to Google Cloud using Workload Identity
       - name: Authenticate to Google Cloud (OIDC)
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: projects/516216943908/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-ci-sa@packer-automation-483407.iam.gserviceaccount.com
 
+      # Python for Ansible
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
+      # Cache pip dependencies
       - name: Cache pip
         uses: actions/cache@v4
         with:
@@ -54,6 +60,7 @@ jobs:
       - name: Install Ansible deps
         run: pip install ansible passlib
 
+      # Start Vault dev server
       - name: Start Vault Dev Server
         env:
           VAULT_ADDR: http://127.0.0.1:8200
@@ -62,6 +69,7 @@ jobs:
           vault server -dev -dev-root-token-id=root > vault.log 2>&1 &
           sleep 5
 
+      # Put secrets into Vault
       - name: Configure Vault Secrets
         env:
           VAULT_ADDR: http://127.0.0.1:8200
@@ -71,6 +79,7 @@ jobs:
             admin_password="${{ secrets.ADMIN_PASSWORD }}" \
             user1_password="${{ secrets.USER1_PASSWORD }}"
 
+      # Read secrets from Vault and create pkrvars
       - name: Create Packer vars from Vault
         env:
           VAULT_ADDR: http://127.0.0.1:8200
@@ -106,9 +115,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Setup Terraform (fast, cached)
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # Cache Terraform plugins
       - name: Cache Terraform plugins
         uses: actions/cache@v4
         with:
@@ -117,12 +128,14 @@ jobs:
           restore-keys: |
             terraform-${{ runner.os }}-
 
+      # Authenticate to Google Cloud using Workload Identity
       - name: Authenticate to Google Cloud (OIDC)
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: projects/516216943908/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-ci-sa@packer-automation-483407.iam.gserviceaccount.com
 
+      # Generate SSH key for VM access
       - name: Generate temporary SSH key
         run: |
           mkdir -p ~/.ssh
@@ -162,6 +175,7 @@ jobs:
           chmod +x .vscode/scripts/verify_users.sh
           ./.vscode/scripts/verify_users.sh
 
+      # Auto-cleanup after 15 minutes
       - name: Wait 5 minutes before destroy
         run: sleep 300
 
