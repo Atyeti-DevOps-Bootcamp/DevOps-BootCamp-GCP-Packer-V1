@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - sai
+      - feature/sai
   pull_request:
     branches:
       - main
