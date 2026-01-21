@@ -3,8 +3,8 @@ name: Packer GCP Build
 on:
   push:
     branches:
-      - main
-      - sai
+      - feature/opt-alt
+      
   pull_request:
     branches:
       - main
@@ -13,7 +13,8 @@ on:
 permissions:
   id-token: write
   contents: read
-
+env:
+  TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
 jobs:
   packer-build:
     runs-on: ubuntu-latest
@@ -52,20 +53,17 @@ jobs:
       - name: Install Ansible deps
         run: pip install ansible passlib
 
-      - name: Install Packer & Vault
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl unzip gnupg lsb-release jq
-          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
-            | sudo tee /etc/apt/sources.list.d/hashicorp.list
-          sudo apt-get update
-          sudo apt-get install -y packer vault
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@v2
+        with:
+          version: "1.9.2"  # pin the version
 
-      - name: Start Vault
-        run: |
-          vault server -dev -dev-root-token-id=root > vault.log 2>&1 &
-          sleep 5
+      - name: Install Vault
+        run: sudo apt-get install -y vault
+
+      - name: Start Vault dev server
+        run: vault server -dev -dev-root-token-id=root & sleep 5
+
 
       - name: Configure Vault Secrets
         run: |
@@ -91,10 +89,10 @@ jobs:
 
       - name: Packer Build
         id: packer
-        run: |
-          packer build packer_template_gcp | tee packer.log
-          IMAGE_NAME=$(grep -oP "project: \Kpacker-[^ ]+" packer.log | tail -1)
-          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+        run: |  
+         packer build -json packer_template_gcp > packer_output.json
+         IMAGE_ID=$(jq -r '.[0].builds[-1].artifact_id' packer_output.json)
+         echo "image_name=$IMAGE_ID" >> $GITHUB_OUTPUT
 
   terraform-deploy:
     runs-on: ubuntu-latest
