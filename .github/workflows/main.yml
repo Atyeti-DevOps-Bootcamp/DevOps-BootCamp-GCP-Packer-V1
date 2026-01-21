@@ -193,8 +193,8 @@ jobs:
           sudo apt-get install -y terraform
           terraform --version
 
-      - name: Wait 15 minutes
-        run: sleep 900
+      - name: Wait 2 minutes
+        run: sleep 120
         
       - name: Terraform Init
         env:
