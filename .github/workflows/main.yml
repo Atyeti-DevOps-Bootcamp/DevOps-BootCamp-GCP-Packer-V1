@@ -97,9 +97,10 @@ jobs:
       - name: Packer Build
         id: packer
         run: |  
-         packer build -json packer_template_gcp > packer_output.json
-         IMAGE_ID=$(jq -r '.[0].builds[-1].artifact_id' packer_output.json)
+         packer build -machine-readable packer_template_gcp | tee packer.log
+         IMAGE_ID=$(grep ',artifact,0,id,' packer.log | cut -d, -f6)
          echo "image_name=$IMAGE_ID" >> $GITHUB_OUTPUT
+
 
   terraform-deploy:
     runs-on: ubuntu-latest
