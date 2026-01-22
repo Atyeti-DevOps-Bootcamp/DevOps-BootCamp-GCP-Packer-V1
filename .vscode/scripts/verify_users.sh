@@ -28,6 +28,7 @@ echo "Connecting to VM via SSH..."
 ssh $SSH_OPTS admin@"$VM_IP" << 'EOF'
 set -e
 
+export PATH=$PATH:/usr/local/bin
 
 # Verify required installations
 
