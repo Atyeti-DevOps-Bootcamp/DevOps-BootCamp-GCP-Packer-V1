@@ -32,7 +32,7 @@ source "amazon-ebs" "ubuntu" {
 build {
   sources = ["source.amazon-ebs.ubuntu"]
 
-  # ✅ Only install Python (Ansible needs this)
+  # Only install Python (Ansible needs this)
   provisioner "shell" {
     inline = [
       "sudo apt-get update -y",
@@ -42,7 +42,7 @@ build {
     ]
   }
 
-  # ✅ Run Ansible from LOCAL (correct)
+  #  Run Ansible from LOCAL (correct)
   provisioner "ansible" {
     playbook_file = "${path.root}/ansible/playbook.yml"
     use_proxy = false
