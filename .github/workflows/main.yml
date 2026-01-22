@@ -31,6 +31,14 @@ jobs:
           workload_identity_provider: projects/516216943908/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-ci-sa@packer-automation-483407.iam.gserviceaccount.com
 
+
+      - name: Setup gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2   
+
+      - name: Validate GCP authentication
+        run: |
+             gcloud auth list
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
