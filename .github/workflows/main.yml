@@ -123,6 +123,13 @@ jobs:
             -var="image_name=${{ needs.packer-build.outputs.image_name }}" \
             -var="ssh_public_key=${SSH_PUBLIC_KEY}" \
             -auto-approve
+            
+      - name: Validate VM Users & Permissions
+        env:
+           TF_TOKEN_app_terraform_io: ${{ secrets.TFC_TOKEN }}
+        run: |
+          chmod +x .vscode/scripts/verify_users.sh
+          ./.vscode/scripts/verify_users.sh
   
       - name: Wait 2 minutes
         run: sleep 120
