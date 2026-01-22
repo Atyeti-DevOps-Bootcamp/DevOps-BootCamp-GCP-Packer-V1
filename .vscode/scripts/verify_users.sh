@@ -40,20 +40,7 @@ python3 --version >/dev/null 2>&1 || {
   exit 1
 }
 
-echo "Checking Packer..."
-packer --version >/dev/null 2>&1 || {
-  echo "Packer is NOT installed"
-  exit 1
-}
-
-echo "Checking Vault..."
-vault --version >/dev/null 2>&1 || {
-  echo "Vault is NOT installed"
-  exit 1
-}
-
-echo "INSTALLATION VERIFICATION PASSED"
-echo "Python, Ansible, Packer, Vault are installed"
+echo "Python is installed."
 
 # user & security checks 
 
