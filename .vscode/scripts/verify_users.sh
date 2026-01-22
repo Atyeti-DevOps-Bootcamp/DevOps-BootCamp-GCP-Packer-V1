@@ -41,7 +41,7 @@ python3 --version >/dev/null 2>&1 || {
 }
 
 echo "Checking Ansible..."
-ansible --version >/dev/null 2>&1 || {
+sudo ansible --version >/dev/null 2>&1 || {
   echo "Ansible is NOT installed"
   exit 1
 }
