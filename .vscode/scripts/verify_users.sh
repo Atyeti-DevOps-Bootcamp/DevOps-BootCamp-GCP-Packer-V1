@@ -52,6 +52,29 @@ if sudo -l -U user1 >/dev/null 2>&1; then
   exit 1
 fi
 
+
+echo "================ PACKAGE CHECKS ================"
+
+echo "---- Manually installed APT packages ----"
+apt-mark showmanual | sort
+
+echo
+echo "---- All installed APT packages ----"
+dpkg-query -W -f='${binary:Package}\n' | sort
+
+echo
+echo "---- Python packages ----"
+pip3 list || echo "pip3 not installed"
+
+echo
+echo "---- Snap packages ----"
+snap list || echo "snap not installed"
+
+
+
+
+
+
 echo "SECURITY CHECK PASSED"
 echo "admin has sudo"
 echo "user-1 has NO sudo"
