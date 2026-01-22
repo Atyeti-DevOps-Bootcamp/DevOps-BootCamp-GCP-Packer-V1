@@ -40,12 +40,6 @@ python3 --version >/dev/null 2>&1 || {
   exit 1
 }
 
-echo "Checking Ansible..."
-sudo ansible --version >/dev/null 2>&1 || {
-  echo "Ansible is NOT installed"
-  exit 1
-}
-
 echo "Checking Packer..."
 packer --version >/dev/null 2>&1 || {
   echo "Packer is NOT installed"
