@@ -28,6 +28,40 @@ echo "Connecting to VM via SSH..."
 ssh $SSH_OPTS admin@"$VM_IP" << 'EOF'
 set -e
 
+
+# Verify required installations
+
+echo "Verifying installed tools..."
+
+echo "Checking Python..."
+python3 --version >/dev/null 2>&1 || {
+  echo "Python is NOT installed"
+  exit 1
+}
+
+echo "Checking Ansible..."
+ansible --version >/dev/null 2>&1 || {
+  echo "Ansible is NOT installed"
+  exit 1
+}
+
+echo "Checking Packer..."
+packer --version >/dev/null 2>&1 || {
+  echo "Packer is NOT installed"
+  exit 1
+}
+
+echo "Checking Vault..."
+vault --version >/dev/null 2>&1 || {
+  echo "Vault is NOT installed"
+  exit 1
+}
+
+echo "INSTALLATION VERIFICATION PASSED"
+echo "Python, Ansible, Packer, Vault are installed"
+
+# user & security checks 
+
 echo "Checking admin user..."
 id admin >/dev/null 2>&1 || {
   echo "admin user does not exist"
@@ -55,5 +89,5 @@ fi
 echo "SECURITY CHECK PASSED"
 echo "admin has sudo"
 echo "user-1 has NO sudo"
+
 EOF
-#
