@@ -53,26 +53,40 @@ if sudo -l -U user1 >/dev/null 2>&1; then
 fi
 
 
-echo "================ PACKAGE CHECKS ================"
+echo "================ PACKAGE CHECKS ================"s
 
-echo "---- Manually installed APT packages ----"
-apt-mark showmanual | sort
+echo "================ REQUIRED PACKAGE VALIDATION ================"
+
+REQUIRED_PACKAGES=(
+  curl
+  git
+  unzip
+  jq
+  python3
+  python3-pip
+  ansible
+)
+
+MISSING_PACKAGES=()
+
+for pkg in "${REQUIRED_PACKAGES[@]}"; do
+  if dpkg -s "$pkg" >/dev/null 2>&1; then
+    echo "✔ $pkg is installed"
+  else
+    echo "❌ $pkg is NOT installed"
+    MISSING_PACKAGES+=("$pkg")
+  fi
+done
+
+if [ "${#MISSING_PACKAGES[@]}" -ne 0 ]; then
+  echo
+  echo "❌ MISSING REQUIRED PACKAGES:"
+  printf ' - %s\n' "${MISSING_PACKAGES[@]}"
+  exit 1
+fi
 
 echo
-echo "---- All installed APT packages ----"
-dpkg-query -W -f='${binary:Package}\n' | sort
-
-echo
-echo "---- Python packages ----"
-pip3 list || echo "pip3 not installed"
-
-echo
-echo "---- Snap packages ----"
-snap list || echo "snap not installed"
-
-
-
-
+echo "✅ ALL REQUIRED PACKAGES ARE INSTALLED"
 
 
 echo "SECURITY CHECK PASSED"
